@@ -238,7 +238,6 @@ class DockerRegistry(LoggingConfigurable):
 
 
 class AWSElasticContainerRegistry(DockerRegistry):
-    import boto3
 
     aws_region = Unicode(
         config=True,
@@ -251,6 +250,7 @@ class AWSElasticContainerRegistry(DockerRegistry):
 
     @default("ecr_client")
     def _get_ecr_client(self):
+        import boto3
         return boto3.client("ecr", region_name=self.aws_region)
 
     username = "AWS"
@@ -280,7 +280,7 @@ class AWSElasticContainerRegistry(DockerRegistry):
         return kubernetes.client.CoreV1Api()
 
     async def get_image_manifest(self, image, tag):
-        image = image.split("/", 1)[1]
+        '''image should be the name of the image, stripped of the ECR registry URL prefix'''
         await asyncio.wrap_future(self.executor.submit(self._pre_get_image_manifest, image, tag))
         return await super().get_image_manifest(image, tag)
 
